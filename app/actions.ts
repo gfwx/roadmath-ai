@@ -4,10 +4,33 @@ import { encodedRedirect } from "@/utils/utils";
 import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import type { Tables } from "@/utils/database.types";
+
+type User = Tables<"users">
+
+const createUserInDatabase = async (id: string, username: string) => {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from('users')
+    .insert({
+      id: id,
+      username: username,
+      display_name: username,
+      is_onboarded: false,
+    })
+    .select()
+
+  if (error) {
+    return Promise.reject(error);
+  }
+
+  return Promise.resolve(data);
+}
 
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
+  const username = formData.get("username")?.toString();
+
   const supabase = await createClient();
   const origin = (await headers()).get("origin");
 
@@ -19,7 +42,15 @@ export const signUpAction = async (formData: FormData) => {
     );
   }
 
-  const { error } = await supabase.auth.signUp({
+  if (!username) {
+    return encodedRedirect(
+      "error",
+      "/sign-up",
+      "Username is required",
+    );
+  }
+
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -30,14 +61,25 @@ export const signUpAction = async (formData: FormData) => {
   if (error) {
     console.error(error.code + " " + error.message);
     return encodedRedirect("error", "/sign-up", error.message);
-  } else {
-    return redirect(
-      "/"
-    );
   }
+
+  if (!data.user) {
+    return encodedRedirect("error", "/sign-up", "User not found");
+  }
+
+  await createUserInDatabase(data.user.id, username)
+    .catch((error) => {
+      console.error(error);
+      return encodedRedirect("error", "/sign-up", "Failed to create user");
+    });
+
+  return redirect(
+    "/"
+  );
 };
 
 export const signInAction = async (formData: FormData) => {
+
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const supabase = await createClient();
