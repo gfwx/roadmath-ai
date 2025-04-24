@@ -2,10 +2,10 @@ import { signOutAction } from "@/app/actions";
 import { hasEnvVars } from "@/utils/supabase/check-env-vars";
 import Link from "next/link";
 import { Badge } from "./ui/badge";
-import { Button } from "./ui/button";
+import { Button, buttonVariants } from "./ui/button";
 import { createClient } from "@/utils/supabase/server";
 
-export default async function AuthButton({ username }: { username: string }) {
+export default async function AuthButton({ username, is_onboarded }: { username: string, is_onboarded: boolean }) {
   const supabase = await createClient();
 
   const {
@@ -51,6 +51,10 @@ export default async function AuthButton({ username }: { username: string }) {
   return user ? (
     <div className="flex items-center gap-4">
       Hey, {username}!
+
+      {!is_onboarded && <Link className={buttonVariants({ variant: "default", size: "sm" })} href="/onboarding" >
+        Complete your onboarding for personalised results.
+      </Link>}
       <form action={signOutAction}>
         <Button type="submit" variant={"outline"} className='font-sans'>
           Sign out

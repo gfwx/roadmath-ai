@@ -71,7 +71,7 @@ export default async function RootLayout({
                     <div className="flex gap-5 items-center font-semibold">
                       <Link href={"/"}>roadmath.ai</Link>
                     </div>
-                    <HeaderAuth username={userData?.username || ""} />
+                    <HeaderAuth username={userData?.username || ""} is_onboarded={userData?.is_onboarded || false} />
                   </div>
                 </nav>
                 <div className="flex flex-col gap-20 max-w-5xl p-5">
