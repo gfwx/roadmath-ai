@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Badge } from "./ui/badge";
 import { Button, buttonVariants } from "./ui/button";
 import { createClient } from "@/utils/supabase/server";
-
 export default async function AuthButton({ username, is_onboarded }: { username: string, is_onboarded: boolean }) {
   const supabase = await createClient();
 
@@ -55,6 +54,10 @@ export default async function AuthButton({ username, is_onboarded }: { username:
       {!is_onboarded && <Link className={buttonVariants({ variant: "default", size: "sm" })} href="/onboarding" >
         Complete your onboarding for personalised results.
       </Link>}
+
+      <Link className={buttonVariants({ variant: "secondary", size: "sm" })} href="/protected" >
+        Dashboard
+      </Link>
       <form action={signOutAction}>
         <Button type="submit" variant={"outline"} className='font-sans'>
           Sign out
