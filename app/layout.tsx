@@ -46,10 +46,8 @@ export default async function RootLayout({
   let h = await headers();
   let pathname = h.get('x-pathname');
 
-  console.log(pathname)
-
   const supabase = await createClient();
-  // fix this - unsafe
+  // nsf production - change this
   const { data: { session } } = await supabase.auth.getSession();
 
   let userData: User | null = null;
@@ -93,7 +91,7 @@ export default async function RootLayout({
                             {session?.user?.id && <SidebarTrigger />}
                           </ProtectedPathnameWrapper>
                         </div>
-                        <HeaderAuth username={userData?.username || ""} is_onboarded={userData?.is_onboarded || false} />
+                        <HeaderAuth username={userData?.display_name || ""} is_onboarded={userData?.is_onboarded || false} />
                       </div>
                     </nav>
                     <div className="flex flex-col gap-20 max-w-5xl p-5 z-10">

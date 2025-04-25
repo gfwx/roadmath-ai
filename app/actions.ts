@@ -1,6 +1,7 @@
 "use server";
 
 import { encodedRedirect } from "@/utils/utils";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -171,4 +172,54 @@ export const signOutAction = async () => {
   const supabase = await createClient();
   await supabase.auth.signOut();
   return redirect("/sign-in");
+};
+
+const validateIfUserExists = async (supabase: SupabaseClient) => {
+  const { data, error } = await supabase.auth.getUser();
+  return error || !data.user ? false : true;
+};
+
+export const finishOnboarding = async (
+  formData: {
+    username: string;
+    display_name: string;
+    age: string;
+    gender: string;
+    nationality: string;
+    m_comfort_level: string;
+    m_grade_equiv: string;
+  }
+) => {
+  const supabase = await createClient();
+
+  if (!validateIfUserExists) {
+    console.log("Something went wrong.");
+    return redirect("/error");
+  }
+
+  const authUser = (await supabase.auth.getUser()).data.user;
+  if (authUser) {
+    const { data, error } = await supabase.from("users")
+      .upsert<Partial<User>>({
+        id: authUser.id,
+        display_name: formData.display_name ?? formData.username,
+        age: parseInt(formData.age),
+        gender: formData.gender,
+        nationality: formData.nationality,
+        m_comfort_level: parseInt(formData.m_comfort_level),
+        m_grade_equiv: parseInt(formData.m_grade_equiv),
+        is_onboarded: true
+      })
+
+    if (error) {
+      console.log("User update failed");
+      return Promise.reject(error);
+    }
+    else {
+      return Promise.resolve(data);
+    }
+  }
+  else {
+    return Promise.reject("Somehow, despite all the checks, the user is not found. Must be supernatural causes.")
+  }
 };

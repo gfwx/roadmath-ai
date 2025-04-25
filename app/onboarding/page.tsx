@@ -1,5 +1,6 @@
 "use client"
 
+import { SubmitButton } from "@/components/submit-button"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -10,14 +11,17 @@ import { motion } from "framer-motion"
 import { createClient } from "@supabase/supabase-js"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-
+import { useLayout } from "@/app/context/LayoutContext"
+import { finishOnboarding } from "@/app/actions"
+import { finished } from "node:stream/promises"
 
 export default function OnboardingPage() {
+  const userData = useLayout();
   const router = useRouter()
   const [step, setStep] = useState(1)
   const [formData, setFormData] = useState({
-    username: "",
-    display_name: "",
+    username: userData.user?.username ?? "",
+    display_name: userData.user?.display_name ?? "",
     age: "",
     gender: "",
     nationality: "",
@@ -45,7 +49,7 @@ export default function OnboardingPage() {
         return (
           formData.username.trim() !== "" &&
           formData.display_name.trim() !== "" &&
-          formData.age.trim() !== "" &&
+          formData.age.trim() !== "" && /^\d+$/.test(formData.age) === true &&
           formData.gender.trim() !== "" &&
           formData.nationality.trim() !== ""
         )
@@ -67,34 +71,42 @@ export default function OnboardingPage() {
   }
 
   const handleSubmit = async () => {
+    if (isStepValid()) {
+      await finishOnboarding(formData)
+        .then(() => router.push('/protected'))
+        .catch(error => {
+          console.log(error);
+          // router.push('/error');
+        })
+    }
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-white text-black">
-      <div className="w-full max-w-2xl space-y-8">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-background">
+      <form className="w-full max-w-2xl space-y-8">
         <div className="space-y-2 text-center">
-          <h1 className="text-3xl font-bold">Welcome to RoadMath</h1>
-          <p className="text-gray-600">Let's get you set up with a personalized learning experience</p>
+          <h1 className="text-3xl font-bold ">Onboarding</h1>
+          <p >A set of questions to help us optimise your experience.</p>
         </div>
 
-        <Card className="w-full border-black">
+        <Card className="w-full shadow-lg">
           <CardContent className="pt-6">
             <div className="space-y-6">
               <div className="space-y-2">
                 <h3 className="text-xl font-semibold">
                   {step === 1
-                    ? "Question 1 of 3: Your Grade Level"
+                    ? "1. Your Grade Level"
                     : step === 2
-                      ? "Question 2 of 3: Math Comfort Level"
-                      : "Question 3 of 3: Your Details"}
+                      ? "2. Math Comfort Level"
+                      : "3. Your Details"}
                 </h3>
-                <p className="text-sm text-gray-500">
+                {/* <p className="text-sm text-gray-500">
                   {step === 1
                     ? "This helps us tailor the content to your academic level."
                     : step === 2
                       ? "Let us know how comfortable you are with mathematics."
                       : "Tell us a bit about yourself to complete your profile."}
-                </p>
+                </p> */}
               </div>
 
               <div className="space-y-4">
@@ -189,6 +201,8 @@ export default function OnboardingPage() {
                         <Label htmlFor="username">Username</Label>
                         <Input
                           id="username"
+                          disabled
+                          type="text"
                           value={formData.username}
                           onChange={(e) => handleInputChange("username", e.target.value)}
                           className="mt-1"
@@ -198,6 +212,7 @@ export default function OnboardingPage() {
                       <div>
                         <Label htmlFor="display_name">Display Name</Label>
                         <Input
+                          type="text"
                           id="display_name"
                           value={formData.display_name}
                           onChange={(e) => handleInputChange("display_name", e.target.value)}
@@ -251,7 +266,7 @@ export default function OnboardingPage() {
         <div className="space-y-4">
           <div className="w-full bg-gray-200 rounded-full h-2.5">
             <motion.div
-              className="bg-black h-2.5 rounded-full"
+              className="bg-primary h-2.5 rounded-full"
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
               transition={{ duration: 0.3 }}
@@ -260,29 +275,31 @@ export default function OnboardingPage() {
 
           <div className="flex justify-between">
             <Button
-              variant="outline"
+              variant="secondary"
               onClick={handleBack}
               disabled={step === 1}
-              className="border-black text-black hover:bg-gray-100"
             >
               Back
             </Button>
             {step < totalSteps ? (
-              <Button onClick={handleNext} disabled={!isStepValid()} className="bg-black text-white hover:bg-gray-800">
+              <Button variant={"default"} onClick={handleNext} disabled={!isStepValid()} className="hover:bg-gray-800">
                 Continue
               </Button>
             ) : (
-              <Button
+              <SubmitButton
                 onClick={handleSubmit}
                 disabled={!isStepValid()}
-                className="bg-black text-white hover:bg-gray-800"
+                formAction={handleSubmit}
+                variant={"default"}
+                pendingText="Processing.."
+                className="hover:bg-gray-800"
               >
                 Complete Setup
-              </Button>
+              </SubmitButton>
             )}
           </div>
         </div>
-      </div>
+      </form>
     </div>
   )
 }
