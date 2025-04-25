@@ -17,6 +17,8 @@ import { LayoutProvider } from "./context/LayoutContext";
 
 
 type User = Tables<"users">
+type Roadmap = Tables<"roadmaps">
+
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -51,6 +53,7 @@ export default async function RootLayout({
   const { data: { session } } = await supabase.auth.getSession();
 
   let userData: User | null = null;
+  let roadmapsData: Roadmap[] | null = null;
 
   if (session?.user?.id) {
     const { data, error } = await supabase
@@ -64,11 +67,22 @@ export default async function RootLayout({
     }
   }
 
+  if (session?.user?.id) {
+    const { data, error } = await supabase
+      .from("roadmaps")
+      .select("*")
+      .eq("user_id", session.user.id)
+
+    if (!error && data) {
+      roadmapsData = data;
+    }
+  }
+
   return (
     <html lang="en" className={inter.className} suppressHydrationWarning={true}>
       <body className="bg-background text-foreground">
         <PathnameProvider>
-          <LayoutProvider user={userData}>
+          <LayoutProvider user={userData} roadmaps={roadmapsData}>
             <ThemeProvider
               attribute="class"
               defaultTheme="system"

@@ -1,19 +1,15 @@
+"use client"
 import { DashboardComponent } from "@/components/dashboard";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+import { useLayout } from "@/app/context/LayoutContext";
+import { useEffect } from "react";
+import type { Tables } from "@/utils/database.types";
+type Roadmap = Tables<"roadmaps">
 
-export default async function ProtectedPage() {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return redirect("/sign-in");
-  }
-
+export default function ProtectedPage() {
+  let roadmapData: Roadmap[] | null = useLayout().roadmaps;
   return (
-    <DashboardComponent />
+    <DashboardComponent roadmapData={roadmapData} />
   );
 }

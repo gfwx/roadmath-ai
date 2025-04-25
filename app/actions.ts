@@ -224,6 +224,29 @@ export const finishOnboarding = async (
   }
 };
 
+export const fetchRoadmaps = async () => {
+  const supabase = await createClient();
+  const user = await supabase.auth.getUser();
+  if (user.error || !user.data.user) {
+    console.log("User not found");
+    return Promise.reject(user.error);
+  }
+
+  const currentUser = user.data.user;
+  const { data, error } = await supabase
+    .from("roadmaps")
+    .select("*")
+    .filter("user_id", "eq", currentUser.id)
+
+  if (error) {
+    console.log("Roadmaps fetch failed");
+    return Promise.reject(error);
+  }
+  else {
+    return Promise.resolve(data);
+  }
+};
+
 export const createNewRoadmap = async () => {
   console.log("Create a new roadmap\n")
 }
