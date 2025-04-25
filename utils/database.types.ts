@@ -16,6 +16,7 @@ export type Database = {
           id: string
           is_completed: boolean | null
           next_node: string | null
+          node_order: number | null
           roadmap_id: string | null
         }
         Insert: {
@@ -24,6 +25,7 @@ export type Database = {
           id?: string
           is_completed?: boolean | null
           next_node?: string | null
+          node_order?: number | null
           roadmap_id?: string | null
         }
         Update: {
@@ -32,6 +34,7 @@ export type Database = {
           id?: string
           is_completed?: boolean | null
           next_node?: string | null
+          node_order?: number | null
           roadmap_id?: string | null
         }
         Relationships: [
@@ -46,36 +49,33 @@ export type Database = {
       }
       roadmaps: {
         Row: {
-          completion_percentage: number | null
           created_at: string
-          current_node: string | null
+          current_node: number | null
           description: string | null
           difficulty: number | null
           id: string
-          initial_node: string | null
           title: string | null
+          total_nodes: number | null
           user_id: string | null
         }
         Insert: {
-          completion_percentage?: number | null
           created_at?: string
-          current_node?: string | null
+          current_node?: number | null
           description?: string | null
           difficulty?: number | null
           id: string
-          initial_node?: string | null
           title?: string | null
+          total_nodes?: number | null
           user_id?: string | null
         }
         Update: {
-          completion_percentage?: number | null
           created_at?: string
-          current_node?: string | null
+          current_node?: number | null
           description?: string | null
           difficulty?: number | null
           id?: string
-          initial_node?: string | null
           title?: string | null
+          total_nodes?: number | null
           user_id?: string | null
         }
         Relationships: [

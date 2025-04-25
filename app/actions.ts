@@ -250,3 +250,21 @@ export const fetchRoadmaps = async () => {
 export const createNewRoadmap = async () => {
   console.log("Create a new roadmap\n")
 }
+
+export const fetchRoadmapFromUser = async (roadmapId: string) => {
+  const supabase = await createClient();
+  const user_id = await supabase.auth.getUser().then((user) => user.data?.user ? user.data.user.id : null);
+  const { data, error } = await supabase
+    .from("roadmaps")
+    .select("*")
+    .filter("user_id", "eq", user_id)
+    .filter("id", "eq", roadmapId)
+
+  if (error) {
+    console.log("Roadmap fetch failed");
+    return Promise.reject(error);
+  }
+  else {
+    return Promise.resolve(data);
+  }
+}

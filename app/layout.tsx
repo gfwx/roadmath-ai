@@ -4,6 +4,8 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { headers } from "next/headers"
 import ProtectedPathnameWrapper from "@/components/ui/sidebarTriggerWrapper";
+import dynamic from 'next/dynamic';
+
 
 import PathnameProvider from "@/utils/pathname_wrapper";
 import HeaderAuth from "@/components/header";

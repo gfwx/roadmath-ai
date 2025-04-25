@@ -3,6 +3,8 @@
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 import { DialogCloseButton } from "./create-roadmap-dialog"
+import { useState } from "react"
+import Link from "next/link"
 
 import {
   Sidebar,
@@ -14,8 +16,12 @@ import {
 
 import { useLayout } from "@/app/context/LayoutContext"
 
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
+
 export function AppSidebar() {
+
   const { roadmaps } = useLayout();
+  const currentPath = usePathname();
   return (
     <Sidebar>
       <SidebarHeader>
@@ -26,15 +32,22 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent className="flex flex-col items-center text-sm px-2">
         {roadmaps ?
-          <Button className='w-full rounded-none flex justify-between' variant="outline">
-            <p className='text-sm'>
-              {roadmaps[0].title}
-            </p>
+          roadmaps.map((roadmap) => (
 
-            <p className='text-sm text-primary'>
-              {roadmaps[0].total_nodes}%
-            </p>
-          </Button>
+            <Link href={`${currentPath}?roadmap=${roadmap.id}`} key={roadmap.id}>
+              <Button className='w-full rounded-none flex justify-between' variant="outline">
+                <p className='text-sm'>
+                  {roadmap.title}
+                </p>
+
+                <p className='text-sm text-primary'>
+                  {/* @ts-ignore  */}
+                  {roadmap.total_nodes}%
+                </p>
+              </Button>
+            </Link>
+
+          ))
           :
           <div>No roadmaps</div>
         }
