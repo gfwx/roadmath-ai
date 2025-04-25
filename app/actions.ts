@@ -223,3 +223,7 @@ export const finishOnboarding = async (
     return Promise.reject("Somehow, despite all the checks, the user is not found. Must be supernatural causes.")
   }
 };
+
+export const createNewRoadmap = async () => {
+  console.log("Create a new roadmap\n")
+}

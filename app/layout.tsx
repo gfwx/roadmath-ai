@@ -94,7 +94,7 @@ export default async function RootLayout({
                         <HeaderAuth username={userData?.display_name || ""} is_onboarded={userData?.is_onboarded || false} />
                       </div>
                     </nav>
-                    <div className="flex flex-col gap-20 max-w-5xl p-5 z-10">
+                    <div className="flex flex-col gap-20 max-w-5xl w-full h-full p-5 z-10">
                       {children}
                     </div>
                   </div>

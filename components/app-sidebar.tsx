@@ -1,5 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
+import { FormGenerateWrapper } from "./form-generate-wrapper"
+import { createNewRoadmap } from "@/app/actions"
 import { DialogCloseButton } from "./create-roadmap-dialog"
 import {
   Sidebar,
@@ -17,6 +19,7 @@ export function AppSidebar() {
         No roadmaps generated.
       </SidebarContent>
       <SidebarFooter>
+
         <DialogCloseButton />
       </SidebarFooter>
     </Sidebar>
