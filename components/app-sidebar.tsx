@@ -34,8 +34,8 @@ export function AppSidebar() {
         {roadmaps ?
           roadmaps.map((roadmap) => (
 
-            <Link href={`${currentPath}?roadmap=${roadmap.id}`} key={roadmap.id}>
-              <Button className='w-full rounded-none flex justify-between' variant="outline">
+            <Link href={`${currentPath}?roadmap=${roadmap.id}`} key={roadmap.id} className="w-full">
+              <Button className=' rounded-none w-full flex justify-between' variant="outline">
                 <p className='text-sm'>
                   {roadmap.title}
                 </p>

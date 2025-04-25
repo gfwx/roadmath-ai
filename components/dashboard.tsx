@@ -35,8 +35,6 @@ export function DashboardComponent({ roadmapData }: { roadmapData: Roadmap[] | n
       setCurrentRoadmap(roadmap);
     });
   }, [searchParams, currentRoadmap?.id]);
-
-  console.log(currentRoadmap);
   return (
     <main className="flex flex-col min-w-64  mx-auto pt-16 w-full h-full">
       <div className="flex flex-col gap-2 bottom-0 mt-32 items-center ">
