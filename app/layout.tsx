@@ -49,6 +49,7 @@ export default async function RootLayout({
   console.log(pathname)
 
   const supabase = await createClient();
+  // fix this - unsafe
   const { data: { session } } = await supabase.auth.getSession();
 
   let userData: User | null = null;
@@ -76,13 +77,13 @@ export default async function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
-              <SidebarProvider defaultOpen={session?.user?.id ? true : false}>
+              <SidebarProvider defaultOpen={true}>
                 <ProtectedPathnameWrapper>
                   {session?.user?.id && <AppSidebar />}
                 </ProtectedPathnameWrapper>
                 <main className="min-h-screen flex flex-col items-center w-full">
                   <div className="flex-1 w-full flex flex-col gap-20 items-center">
-                    <nav className="w-full flex justify-center max-w-screen-2xl border-b border-b-foreground/10">
+                    <nav className="w-full h-16 flex justify-center max-w-screen-2xl border-b border-b-foreground/10 fixed top-0 bg-card left-0 z-50 ">
                       <div className="w-full flex justify-between items-center p-3 px-5 text-sm">
                         <div className="flex justify-center gap-4">
                           <div className="flex gap-5 items-center font-semibold">
@@ -95,7 +96,7 @@ export default async function RootLayout({
                         <HeaderAuth username={userData?.username || ""} is_onboarded={userData?.is_onboarded || false} />
                       </div>
                     </nav>
-                    <div className="flex flex-col gap-20 max-w-5xl p-5">
+                    <div className="flex flex-col gap-20 max-w-5xl p-5 z-10">
                       {children}
                     </div>
                   </div>
