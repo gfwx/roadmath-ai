@@ -42,7 +42,7 @@ export function AppSidebar() {
 
                 <p className='text-sm text-primary'>
                   {/* @ts-ignore  */}
-                  {roadmap.total_nodes}%
+                  {(roadmap.current_node ?? 0 / roadmap.total_nodes) * 100}%
                 </p>
               </Button>
             </Link>

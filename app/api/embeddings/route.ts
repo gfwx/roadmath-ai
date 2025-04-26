@@ -29,7 +29,6 @@ export async function POST(request: Request) {
       })
     });
 
-    // Check if the OpenAI API response was successful
     if (!response.ok) {
       const error = await response.json();
       console.error('API error:', error);
@@ -40,7 +39,7 @@ export async function POST(request: Request) {
     }
 
     const responseData = await response.json();
-    console.log('API response:', responseData); // Log the full response
+    console.log('API response:', responseData);
 
     if (!responseData.data || !responseData.data[0]) {
       return new Response(JSON.stringify({ error: 'Unexpected API response format' }), {

@@ -369,3 +369,50 @@ export const fetchRoadmapFromUser = async (roadmapId: string) => {
     return Promise.resolve(data);
   }
 }
+
+export const fetchNodesFromRoadmap = async (roadmapId: string) => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("node")
+    .select("*")
+    .filter("roadmap_id", "eq", roadmapId)
+    .order("node_order", { ascending: true })
+
+  if (error) {
+    console.log("Nodes fetch failed");
+    return Promise.reject(error);
+  }
+  else {
+    return Promise.resolve(data);
+  }
+}
+
+export const fetchNodeData = async (roadmapId: string, nodeId: string) => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("node_data")
+    .select("*")
+    .filter("roadmap_id", "eq", roadmapId)
+    .filter("node_id", "eq", nodeId)
+
+  if (error) {
+    console.log("Node data fetch failed");
+    return Promise.reject(error);
+  }
+  else {
+    return Promise.resolve(data);
+  }
+}
+
+export const createNodeData = async (roadmapId: string, nodeId: string) => {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/elaborate`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      title:
+        roadmapId, nodeId
+    })
+  });
+}

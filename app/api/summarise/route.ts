@@ -19,7 +19,7 @@ const SYSTEM_PROMPT = `
 	1.	A roadmap object:
 	•	title: The name of the roadmap. It should not exceed 20 characters. It must be relevant
 	•	difficulty: A number from 1–5, estimating the roadmap’s challenge level
-	•	description: A short, clear summary of what the student will learn and achieve
+	•	description: A complete, distinct summary of what the student will learn and achieve
 	2.	A list of nodes, where each node is a single, digestible concept. Each node includes:
 	•	data:
 	•	title: Concept title (e.g. “Unit Circle”, “Laws of Logarithms”)
@@ -33,6 +33,7 @@ const SYSTEM_PROMPT = `
 	•	Ensure content is age-appropriate, focused on depth and application
 	•	Use plain English, but don’t shy away from introducing proper terminology
 	•	Your tone should be clear, motivating, and precise
+	- Make sure each node has a complete, thorough description.
 
   Output format:
 	•	Return the roadmap and nodes as a single JSON object

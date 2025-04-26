@@ -1,8 +1,10 @@
 "use client"
 
 import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import Link from "next/link";
 import { SubmitButton } from "@/components/submit-button";
-import { createNewRoadmap, fetchRoadmapFromUser } from "@/app/actions";
+import { createNewRoadmap, fetchRoadmapFromUser, fetchNodesFromRoadmap } from "@/app/actions";
 import type { Tables } from "@/utils/database.types";
 import { getRoadmapEmbeddings, getAiResponse } from "@/app/actions";
 
@@ -11,14 +13,17 @@ import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react";
 import { Divide } from "lucide-react";
 import { useLayout } from "@/app/context/LayoutContext";
-
+import { Separator } from "./ui/separator";
+import { Button } from "@/components/ui/button"
 
 type Roadmap = Tables<"roadmaps">
+type Node = Tables<"node">
 
 export function DashboardComponent({ roadmapData }: { roadmapData: Roadmap[] | null }) {
   const searchParams = useSearchParams();
   const [currentInput, setCurrentInput] = useState("");
   const [currentRoadmap, setCurrentRoadmap] = useState<Roadmap | null>(null);
+  const [currentNodes, setCurrentNodes] = useState<Node[] | null>(null);
   const data = useLayout();
 
   async function handleSubmit() {
@@ -42,10 +47,17 @@ export function DashboardComponent({ roadmapData }: { roadmapData: Roadmap[] | n
       //@ts-ignore
       setCurrentRoadmap(roadmap);
     });
+
+    fetchNodesFromRoadmap(roadmapId).then((nodes) => {
+      //@ts-ignore
+      setCurrentNodes(nodes);
+    });
+
   }, [searchParams, currentRoadmap?.id]);
+
   return (
     <main className="flex flex-col min-w-64  mx-auto pt-16 w-full h-full">
-      <div className="flex flex-col gap-2 bottom-0 mt-32 items-center ">
+      <div className="flex flex-col gap-2 bottom-0 items-center ">
         {!currentRoadmap ? (
           <>
             <h1 className="text-2xl font-bold self-center">Create a new roadmap</h1>
@@ -62,7 +74,40 @@ export function DashboardComponent({ roadmapData }: { roadmapData: Roadmap[] | n
           </>
         ) : (
           <div className='w-fit break-words max-w-full'>
-            {JSON.stringify(currentRoadmap)}
+            <section >
+              <h1 className='text-2xl font-bold'>
+                {currentRoadmap[0].title}
+              </h1>
+
+              <p>
+                {currentRoadmap[0].description}
+              </p>
+            </section>
+
+            <Separator className="my-4" />
+
+            {currentNodes &&
+
+              <section className="flex flex-col gap-4">
+                {currentNodes.map((node) => (
+                  <div key={node.id}>
+                    <Link href={`/protected/roadmap/${currentRoadmap[0].id}?query=${node.id}`}>
+                      <Card className='transition-all hover:bg-primary hover:text-card'>
+                        <CardHeader />
+                        <CardContent>
+                          <h2 className='text-lg font-bold'>{node.data.title ?? 'No title provided'}</h2>
+                          <p className='text-sm'>{node.data.description ?? 'No description provided'}</p>
+                        </CardContent>
+                        <CardFooter>
+                          {node.id}
+                        </CardFooter>
+                      </Card>
+                    </Link>
+                  </div>
+                ))}
+              </section>
+            }
+            {/* {JSON.stringify(currentRoadmap)} */}
           </div>
         )}
       </div>
