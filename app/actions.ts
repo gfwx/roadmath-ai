@@ -6,8 +6,12 @@ import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import type { Tables } from "@/utils/database.types";
+import { v4 as uuidv4 } from 'uuid';
+import { revalidatePath } from "next/cache";
 
 type User = Tables<"users">
+type Roadmap = Tables<"roadmaps">
+type Node = Tables<"node">
 
 const createUserInDatabase = async (id: string, username: string) => {
   const supabase = await createClient();
@@ -247,8 +251,105 @@ export const fetchRoadmaps = async () => {
   }
 };
 
-export const createNewRoadmap = async () => {
-  console.log("Create a new roadmap\n")
+export const getRoadmapEmbeddings = async (query: string) => {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/embeddings`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ query })
+  })
+
+  if (!response.ok) {
+    console.log("Embeddings fetch failed");
+    return Promise.reject(response.statusText);
+  }
+
+  const embeddings = await response.json();
+  console.log("Received embeddings:", embeddings); // Log the received data
+  return embeddings;
+}
+
+export const getAiResponse = async (input: string, age: number, comfort_level: number, additional_subject_info: string) => {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/summarise`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ input, age, comfort_level, additional_subject_info })
+  });
+
+  if (!response.ok) {
+    throw new Error(`API request failed with status ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.result;
+}
+
+export const createNewRoadmap = async (input: string, age: number, comfort_level: number, additional_subject_info: string) => {
+  try {
+    const supabase = await createClient();
+    const { data: userData } = await supabase.auth.getUser();
+    const user_id = userData?.user?.id;
+
+    if (!user_id) {
+      throw new Error("User not authenticated");
+    }
+
+    const data = await getAiResponse(input, age, comfort_level, additional_subject_info);
+    const jsonData = JSON.parse(data);
+
+    const roadmap_id = uuidv4();
+
+    const { data: roadmapData, error: roadmapError } = await supabase.from("roadmaps")
+      .insert<Partial<Roadmap>>({
+        id: roadmap_id,
+        user_id: user_id,
+        title: jsonData.roadmap.title,
+        difficulty: jsonData.roadmap.difficulty,
+        description: jsonData.roadmap.description,
+        total_nodes: jsonData.nodes.length,
+      })
+      .select();
+
+    if (roadmapError) {
+      throw new Error(`Error creating roadmap: ${roadmapError.message}`);
+    }
+    const nodePromises = jsonData.nodes.map(async (node: any) => {
+      return supabase.from("node")
+        .insert<Partial<Node>>({
+          id: uuidv4(),
+          roadmap_id: roadmap_id,
+          is_completed: false,
+          node_order: node.node_order,
+          data: node.data
+        });
+    });
+
+    const nodeResults = await Promise.all(nodePromises);
+
+    const nodeErrors = nodeResults.filter(result => result.error);
+    if (nodeErrors.length > 0) {
+      console.error("Some nodes failed to insert:", nodeErrors);
+    }
+
+    revalidatePath('/dashboard');
+
+    return {
+      success: true,
+      roadmap_id,
+      roadmap: jsonData.roadmap,
+      nodes_inserted: jsonData.nodes.length - nodeErrors.length
+    };
+  } catch (error) {
+    console.error("Failed to create roadmap:", error);
+    return {
+      success: false,
+      //@ts-ignore
+      error: error.message
+    };
+  }
 }
 
 export const fetchRoadmapFromUser = async (roadmapId: string) => {
