@@ -6,6 +6,7 @@
 
 @layer base {
     :root {
+        --background: 0 0% 98%;
         --font-roboto: roboto;
         --font-inter: inter --background: 0 0% 100%;
         --foreground: 20 14.3% 4.1%;

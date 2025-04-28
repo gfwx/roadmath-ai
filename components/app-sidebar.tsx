@@ -25,7 +25,7 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <p className='text-sm font-mono text-primary text-bold self-center justify-self-center'>
+        <p className='text-sm font-sans text-primary font-black self-center justify-self-center pt-4'>
           Active Roadmaps
         </p>
         <Separator className='my-4' />

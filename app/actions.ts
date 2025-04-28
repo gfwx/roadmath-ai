@@ -392,13 +392,13 @@ export const fetchNodeData = async (roadmapId: string, nodeId: string) => {
   const { data, error } = await supabase
     .from("node_data")
     .select("*")
-    .filter("roadmap_id", "eq", roadmapId)
-    .filter("node_id", "eq", nodeId)
+    .filter("id", "eq", nodeId)
 
   if (error) {
     console.log("Node data fetch failed");
     return Promise.reject(error);
   }
+
   else {
     return Promise.resolve(data);
   }
@@ -411,8 +411,9 @@ export const createNodeData = async (roadmapId: string, nodeId: string) => {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      title:
-        roadmapId, nodeId
+      title: roadmapId,
+      roadmapId,
+      nodeId
     })
   });
 }

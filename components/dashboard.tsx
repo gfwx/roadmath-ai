@@ -1,13 +1,13 @@
 "use client"
 
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import Link from "next/link";
 import { SubmitButton } from "@/components/submit-button";
 import { createNewRoadmap, fetchRoadmapFromUser, fetchNodesFromRoadmap } from "@/app/actions";
 import type { Tables } from "@/utils/database.types";
-import { getRoadmapEmbeddings, getAiResponse } from "@/app/actions";
-
+import { useCurrentRoadmapStore } from "@/components/stores";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react";
@@ -24,7 +24,9 @@ export function DashboardComponent({ roadmapData }: { roadmapData: Roadmap[] | n
   const [currentInput, setCurrentInput] = useState("");
   const [currentRoadmap, setCurrentRoadmap] = useState<Roadmap | null>(null);
   const [currentNodes, setCurrentNodes] = useState<Node[] | null>(null);
+
   const data = useLayout();
+  const globalCurrentRoadmap = useCurrentRoadmapStore();
 
   async function handleSubmit() {
     if (!data.user) return;
@@ -56,22 +58,25 @@ export function DashboardComponent({ roadmapData }: { roadmapData: Roadmap[] | n
   }, [searchParams, currentRoadmap?.id]);
 
   return (
-    <main className="flex flex-col min-w-64  mx-auto pt-16 w-full h-full">
-      <div className="flex flex-col gap-2 bottom-0 items-center ">
+    <main className="flex flex-col min-w-64 mx-auto w-full h-full">
+      <div className="flex flex-col gap-2 items-center h-full my-[100px]">
         {!currentRoadmap ? (
-          <>
-            <h1 className="text-2xl font-bold self-center">Create a new roadmap</h1>
-            <div className="flex gap-4 items-stretch h-12 w-full max-w-screen-md">
-              <Textarea
+          <div className="w-full my-auto h-full flex items-center flex-col gap-8">
+            <div className='w-full flex flex-col gap-0 items-center'>
+              <h1 className="text-2xl font-bold ">Create a new roadmap</h1>
+              <p>Feel free to ask either questions or even a single word.</p>
+            </div>
+            <div className="flex gap-2 items-stretch w-full max-w-screen-md">
+              <Input
                 className="border-primary border-2 resize-none w-full "
                 value={currentInput}
                 onChange={(e) => setCurrentInput(e.target.value)}
-                placeholder="What's relentlessly bogging your mind?" />
+                placeholder='"Help me understand Differential Equations"' />
               <form>
                 <SubmitButton pendingText="Waiting.." formAction={handleSubmit} className="h-full"> Send </SubmitButton>
               </form>
             </div>
-          </>
+          </div>
         ) : (
           <div className='w-fit break-words max-w-full'>
             <section >
