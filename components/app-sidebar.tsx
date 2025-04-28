@@ -25,7 +25,7 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <p className='text-sm font-mono text-primary text-bold self-center justify-self-center'>
+        <p className='text-md text-primary font-black pt-4 self-center justify-self-center'>
           Active Roadmaps
         </p>
         <Separator className='my-4' />
@@ -34,7 +34,7 @@ export function AppSidebar() {
         {roadmaps ?
           roadmaps.map((roadmap) => (
 
-            <Link href={`${currentPath}?roadmap=${roadmap.id}`} key={roadmap.id} className="w-full">
+            <Link href={`/protected?roadmap=${roadmap.id}`} key={roadmap.id} className="w-full">
               <Button className=' rounded-none w-full flex justify-between' variant="outline">
                 <p className='text-sm'>
                   {roadmap.title}

@@ -8,13 +8,13 @@ interface RoadmapLayoutProps {
 }
 
 export default async function RoadmapLayout({ children, params }: RoadmapLayoutProps) {
-  const { slug, query } = params;
-  const data = await fetchNodeData(slug, query);
+  const { slug, query } = await params;
+  // const data = await fetchNodeData(slug, query);
 
   return (
     <div className="min-h-screen p-6 pt-16">
       <header>{slug}</header>
-      <main>{JSON.stringify(data)}</main>
+      {/* <main>{JSON.stringify(data)}</main> */}
     </div>
   );
 }

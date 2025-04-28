@@ -352,7 +352,7 @@ export const createNewRoadmap = async (input: string, age: number, comfort_level
   }
 }
 
-export const fetchRoadmapFromUser = async (roadmapId: string) => {
+export const fetchRoadmapFromUser = async (roadmapId: string): Promise<Roadmap> => {
   const supabase = await createClient();
   const user_id = await supabase.auth.getUser().then((user) => user.data?.user ? user.data.user.id : null);
   const { data, error } = await supabase
@@ -360,13 +360,15 @@ export const fetchRoadmapFromUser = async (roadmapId: string) => {
     .select("*")
     .filter("user_id", "eq", user_id)
     .filter("id", "eq", roadmapId)
+    .limit(1)
 
-  if (error) {
+  if (error || !data || data.length === 0) {
     console.log("Roadmap fetch failed");
     return Promise.reject(error);
   }
   else {
-    return Promise.resolve(data);
+    const roadmap: Roadmap = data[0];
+    return Promise.resolve(roadmap);
   }
 }
 
@@ -383,7 +385,8 @@ export const fetchNodesFromRoadmap = async (roadmapId: string) => {
     return Promise.reject(error);
   }
   else {
-    return Promise.resolve(data);
+    const nodeData: Node[] = data;
+    return Promise.resolve(nodeData);
   }
 }
 

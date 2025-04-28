@@ -97,7 +97,7 @@ export default async function RootLayout({
                 </ProtectedPathnameWrapper>
                 <main className="min-h-screen flex flex-col items-center w-full">
                   <div className="flex-1 w-full flex flex-col gap-20 items-center">
-                    <nav className="w-full h-16 flex justify-center max-w-screen-2xl border-b border-b-foreground/10 fixed top-0 bg-card left-0 z-50 ">
+                    <nav className="w-full h-16 flex justify-center border-b border-b-foreground/10 fixed top-0 bg-sidebar left-0 z-50 ">
                       <div className="w-full flex justify-between items-center p-3 px-5 text-sm">
                         <div className="flex justify-center gap-4">
                           <div className="flex gap-5 items-center font-semibold">
