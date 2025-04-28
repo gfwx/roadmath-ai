@@ -1,11 +1,10 @@
 import { createClient } from "@/utils/supabase/server";
+import { StepBack } from "lucide-react";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { headers } from "next/headers"
 import ProtectedPathnameWrapper from "@/components/ui/sidebarTriggerWrapper";
-import dynamic from 'next/dynamic';
-
 
 import PathnameProvider from "@/utils/pathname_wrapper";
 import HeaderAuth from "@/components/header";
@@ -17,10 +16,8 @@ import Link from "next/link";
 import "./globals.css";
 import { LayoutProvider } from "./context/LayoutContext";
 
-
 type User = Tables<"users">
 type Roadmap = Tables<"roadmaps">
-
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -51,17 +48,18 @@ export default async function RootLayout({
   let pathname = h.get('x-pathname');
 
   const supabase = await createClient();
-  // nsf production - change this
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data } = await supabase.auth.getUser();
+
+  const activeUser = data.user;
 
   let userData: User | null = null;
   let roadmapsData: Roadmap[] | null = null;
 
-  if (session?.user?.id) {
+  if (activeUser?.id) {
     const { data, error } = await supabase
       .from("users")
       .select("*")
-      .eq("id", session.user.id)
+      .eq("id", activeUser.id)
       .single();
 
     if (!error && data) {
@@ -69,11 +67,11 @@ export default async function RootLayout({
     }
   }
 
-  if (session?.user?.id) {
+  if (userData?.id) {
     const { data, error } = await supabase
       .from("roadmaps")
       .select("*")
-      .eq("user_id", session.user.id)
+      .eq("user_id", userData.id)
 
     if (!error && data) {
       roadmapsData = data;
@@ -93,7 +91,7 @@ export default async function RootLayout({
             >
               <SidebarProvider defaultOpen={true}>
                 <ProtectedPathnameWrapper>
-                  {session?.user?.id && <AppSidebar />}
+                  {userData?.id && <AppSidebar />}
                 </ProtectedPathnameWrapper>
                 <main className="min-h-screen flex flex-col items-center w-full">
                   <div className="flex-1 w-full flex flex-col gap-20 items-center">
@@ -104,7 +102,7 @@ export default async function RootLayout({
                             <Link href={"/"}>roadmath.ai</Link>
                           </div>
                           <ProtectedPathnameWrapper>
-                            {session?.user?.id && <SidebarTrigger />}
+                            {userData?.id && <SidebarTrigger />}
                           </ProtectedPathnameWrapper>
                         </div>
                         <HeaderAuth username={userData?.display_name || ""} is_onboarded={userData?.is_onboarded || false} />

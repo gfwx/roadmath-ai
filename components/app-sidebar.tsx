@@ -3,8 +3,7 @@
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 import { DialogCloseButton } from "./create-roadmap-dialog"
-import { useState } from "react"
-import Link from "next/link"
+import { useRoadmapStore } from "@/app/stores/store"
 
 import {
   Sidebar,
@@ -19,9 +18,22 @@ import { useLayout } from "@/app/context/LayoutContext"
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 export function AppSidebar() {
-
+  const router = useRouter();
   const { roadmaps } = useLayout();
-  const currentPath = usePathname();
+  const roadmapStore = useRoadmapStore();
+
+  const selectRoadmapHandler = (roadmapId: string) => {
+    // Implement your logic here to select the roadmap
+    if (roadmaps) {
+      const selectedRoadmap = roadmaps.find((r) => r.id === roadmapId);
+      if (selectedRoadmap == undefined) {
+        throw new Error("Somehow, the roadmap doesn't exist, despite rendering it. What black magic sorcery are have you been up to?")
+      }
+      roadmapStore.setRoadmap(selectedRoadmap);
+      router.push(`/protected?roadmap=${roadmapId}`);
+    }
+  };
+
   return (
     <Sidebar>
       <SidebarHeader>
@@ -34,18 +46,16 @@ export function AppSidebar() {
         {roadmaps ?
           roadmaps.map((roadmap) => (
 
-            <Link href={`/protected?roadmap=${roadmap.id}`} key={roadmap.id} className="w-full">
-              <Button className=' rounded-none w-full flex justify-between' variant="outline">
-                <p className='text-sm'>
-                  {roadmap.title}
-                </p>
+            <Button key={roadmap.id} className=' rounded-none w-full flex justify-between' variant="outline" onClick={() => selectRoadmapHandler(roadmap.id)}>
+              <p className='text-sm'>
+                {roadmap.title}
+              </p>
 
-                <p className='text-sm text-primary'>
-                  {/* @ts-ignore  */}
-                  {(roadmap.current_node ?? 0 / roadmap.total_nodes) * 100}%
-                </p>
-              </Button>
-            </Link>
+              <p className='text-sm text-primary'>
+                {/* @ts-ignore  */}
+                {(roadmap.current_node ?? 0 / roadmap.total_nodes) * 100}%
+              </p>
+            </Button>
 
           ))
           :
