@@ -12,6 +12,7 @@ import { revalidatePath } from "next/cache";
 type User = Tables<"users">
 type Roadmap = Tables<"roadmaps">
 type Node = Tables<"node">
+type NodeData = Tables<"node_data">
 
 const createUserInDatabase = async (id: string, username: string) => {
   const supabase = await createClient();
@@ -403,19 +404,44 @@ export const fetchNodeData = async (roadmapId: string, nodeId: string) => {
     return Promise.reject(error);
   }
   else {
-    return Promise.resolve(data);
+    const result: NodeData = data[0];
+    return Promise.resolve(result);
   }
 }
 
-export const createNodeData = async (roadmapId: string, nodeId: string) => {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/elaborate`, {
+export const createNodeData = async (node: Node, roadmap: Roadmap) => {
+  const embedding_data = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/embeddings`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      title:
-        roadmapId, nodeId
+      // @ts-ignore
+      query: `Information on ${node.data.title}: "${node.data.description}"`
     })
-  });
+  })
+
+  if (!embedding_data.ok) {
+    console.log("Embedding data fetch failed");
+    return Promise.reject(embedding_data);
+  }
+
+  const result = await embedding_data.json();
+
+  // Uncomment this after testing embedding data fetch
+
+  // const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/elaborate`, {
+  //   method: 'POST',
+  //   headers: {
+  //     'Content-Type': 'application/json'
+  //   },
+  //   body: JSON.stringify({
+  //     title: node.data.title,
+  //     description: node.data.description,
+  //     difficulty: roadmap.difficulty,
+  //     vector_embedding_context: await embedding_data.json()
+  //   })
+  // });
+  //
+  return Promise.resolve(result);
 }

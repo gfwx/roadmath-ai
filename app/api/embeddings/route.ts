@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 export async function POST(request: Request) {
@@ -55,6 +56,8 @@ export async function POST(request: Request) {
       match_threshold: 0.75,
       match_count: 100
     });
+
+    console.log('Embedding data result:', data);
 
     return new Response(JSON.stringify(data), {
       status: 200,

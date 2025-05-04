@@ -1,10 +1,9 @@
 "use client"
 
-import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import Link from "next/link";
 import { SubmitButton } from "@/components/submit-button";
-import { createNewRoadmap, fetchRoadmapFromUser, fetchNodesFromRoadmap } from "@/app/actions";
+import { createNewRoadmap, fetchRoadmapFromUser, fetchNodesFromRoadmap, createNodeData } from "@/app/actions";
 import type { Tables } from "@/utils/database.types";
 import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -41,9 +40,12 @@ export function DashboardComponent({ roadmapData }: { roadmapData: Roadmap[] | n
 
   async function handleNodeSelect(node: Node) {
     if (!selectedRoadmap) return;
-    const selectedRoadmapId = selectedRoadmap.id;
     setSelectedNode(node);
-    router.push(`/protected/roadmap/${selectedRoadmapId}?query=${node.id}`)
+
+    const data = await createNodeData(node, selectedRoadmap);
+    console.log(data);
+
+    router.push(`/protected/roadmap/${node.id}`)
   }
 
   useEffect(() => {
@@ -54,14 +56,6 @@ export function DashboardComponent({ roadmapData }: { roadmapData: Roadmap[] | n
       resetSelectedRoadmap();
       return;
     }
-
-
-    // Need to come up with a better way to handle this.
-    // If I uncomment above, then on every back navigation, the nodes will not be fetched.
-    // However, if I keep it uncommented, the nodes will be fetched on every navigation, including the same one.
-    // I'm thinking to simply disable the button when the same roadmap is selected.
-    // Alternatively, just store everything locally. That could work too but I'm already handling 2 different types of states and it's quite cumbersome.
-
 
     if (selectedRoadmap?.id !== roadmapId) {
       fetchRoadmapFromUser(roadmapId).then((roadmap) => {
@@ -82,13 +76,13 @@ export function DashboardComponent({ roadmapData }: { roadmapData: Roadmap[] | n
           <>
             <h1 className="text-2xl font-bold self-center">Create a new roadmap</h1>
             <div className="flex gap-4 items-stretch h-12 w-full max-w-screen-md">
-              <Textarea
+              <Input
                 className="border-primary border-2 resize-none w-full "
                 value={currentInput}
                 onChange={(e) => setCurrentInput(e.target.value)}
                 placeholder="What's relentlessly bogging your mind?" />
               <form>
-                <SubmitButton pendingText="Waiting.." formAction={handleSubmit} className="h-full"> Send </SubmitButton>
+                <SubmitButton pendingText="Waiting.." formAction={handleSubmit} className=""> Send </SubmitButton>
               </form>
             </div>
           </>

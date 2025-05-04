@@ -9,6 +9,24 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      documents: {
+        Row: {
+          content: string | null
+          embedding: string | null
+          id: number
+        }
+        Insert: {
+          content?: string | null
+          embedding?: string | null
+          id?: number
+        }
+        Update: {
+          content?: string | null
+          embedding?: string | null
+          id?: number
+        }
+        Relationships: []
+      }
       node: {
         Row: {
           created_at: string
@@ -43,6 +61,41 @@ export type Database = {
             columns: ["roadmap_id"]
             isOneToOne: false
             referencedRelation: "roadmaps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      node_data: {
+        Row: {
+          created_at: string
+          data: Json | null
+          data_id: string | null
+          description: string | null
+          header: string | null
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Json | null
+          data_id?: string | null
+          description?: string | null
+          header?: string | null
+          id: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json | null
+          data_id?: string | null
+          description?: string | null
+          header?: string | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "node_data_data_id_fkey"
+            columns: ["data_id"]
+            isOneToOne: false
+            referencedRelation: "node"
             referencedColumns: ["id"]
           },
         ]
@@ -138,7 +191,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      match_documents: {
+        Args: {
+          query_embedding: string
+          similarity_threshold: number
+          match_count: number
+        }
+        Returns: {
+          id: number
+          content: string
+          similarity: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

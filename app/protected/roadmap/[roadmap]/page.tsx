@@ -1,5 +1,6 @@
 "use client"
 
+import { useRoadmapContext } from "@/app/context/RoadmapContext";
 import { useRoadmapStore } from "@/app/stores/store";
 import { useSelectedNodeStore } from "@/app/stores/store";
 
@@ -8,9 +9,8 @@ interface RoadmapPageProps {
 }
 
 export default function RoadmapPage({ params }: RoadmapPageProps) {
-
-  const selectedRoadmap = useRoadmapStore((state) => state.roadmap);
-  const selectedNode = useSelectedNodeStore((state) => state.node)
+  const selectedNode = useRoadmapContext()?.nodeData;
+  const selectedRoadmap = useRoadmapContext()?.roadmapData;
 
   if (selectedNode == null || selectedNode.data == null) {
     return (
