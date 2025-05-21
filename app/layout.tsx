@@ -1,5 +1,4 @@
 import { createClient } from "@/utils/supabase/server";
-import { StepBack } from "lucide-react";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";

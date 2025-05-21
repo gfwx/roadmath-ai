@@ -30,30 +30,33 @@ export type Database = {
       node: {
         Row: {
           created_at: string
-          data: Json | null
+          description: string | null
           id: string
           is_completed: boolean | null
           next_node: string | null
           node_order: number | null
           roadmap_id: string | null
+          title: string | null
         }
         Insert: {
           created_at?: string
-          data?: Json | null
+          description?: string | null
           id?: string
           is_completed?: boolean | null
           next_node?: string | null
           node_order?: number | null
           roadmap_id?: string | null
+          title?: string | null
         }
         Update: {
           created_at?: string
-          data?: Json | null
+          description?: string | null
           id?: string
           is_completed?: boolean | null
           next_node?: string | null
           node_order?: number | null
           roadmap_id?: string | null
+          title?: string | null
         }
         Relationships: [
           {
@@ -69,32 +72,32 @@ export type Database = {
         Row: {
           created_at: string
           data: Json | null
-          data_id: string | null
           description: string | null
-          header: string | null
           id: string
+          initialized: boolean | null
+          title: string | null
         }
         Insert: {
           created_at?: string
           data?: Json | null
-          data_id?: string | null
           description?: string | null
-          header?: string | null
-          id: string
+          id?: string
+          initialized?: boolean | null
+          title?: string | null
         }
         Update: {
           created_at?: string
           data?: Json | null
-          data_id?: string | null
           description?: string | null
-          header?: string | null
           id?: string
+          initialized?: boolean | null
+          title?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "node_data_data_id_fkey"
-            columns: ["data_id"]
-            isOneToOne: false
+            foreignKeyName: "node_data_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
             referencedRelation: "node"
             referencedColumns: ["id"]
           },

@@ -56,46 +56,36 @@ const SYSTEM_PROMPT = `
     },
     "nodes": [
       {
-        "data": {
-          "title": "What Is a Logarithm?",
-          "description": "Explore the inverse relationship between logarithms and exponents."
-        },
+        "title": "What Is a Logarithm?",
+        "description": "Explore the inverse relationship between logarithms and exponents."
         "node_order": 1,
         "is_completed": false,
         "next_node": null
       },
       {
-        "data": {
-          "title": "Common Logarithmic Functions",
-          "description": "Understand base-10 and natural logarithms and how to evaluate them."
-        },
+        "title": "Common Logarithmic Functions",
+        "description": "Understand base-10 and natural logarithms and how to evaluate them."
         "node_order": 2,
         "is_completed": false,
         "next_node": null
       },
       {
-        "data": {
-          "title": "Logarithmic Rules",
-          "description": "Master the product, quotient, and power rules of logarithms."
-        },
+        "title": "Logarithmic Rules",
+        "description": "Master the product, quotient, and power rules of logarithms."
         "node_order": 3,
         "is_completed": false,
         "next_node": null
       },
       {
-        "data": {
-          "title": "Solving Logarithmic Equations",
-          "description": "Learn techniques to solve equations involving logs, including change of base."
-        },
+        "title": "Solving Logarithmic Equations",
+        "description": "Learn techniques to solve equations involving logs, including change of base."
         "node_order": 4,
         "is_completed": false,
         "next_node": null
       },
       {
-        "data": {
-          "title": "Real-World Applications",
-          "description": "Apply logarithms to real problems like measuring earthquakes and sound intensity."
-        },
+        "title": "Real-World Applications",
+        "description": "Apply logarithms to real problems like measuring earthquakes and sound intensity."
         "node_order": 5,
         "is_completed": false,
         "next_node": null
@@ -110,6 +100,8 @@ type RequestBody = {
   comfort_level: number;
   additional_subject_info: string;
 };
+
+
 
 export async function POST(req: Request): Promise<Response> {
   try {
@@ -127,9 +119,15 @@ export async function POST(req: Request): Promise<Response> {
       ]
     });
 
-    const result = completion.choices[0].message.content;
+    let content = completion.choices[0].message.content;
+    if (!content) {
+      return NextResponse.json({ error: 'No content received' }, { status: 400 });
+    }
 
-    return NextResponse.json({ result });
+    const result = JSON.parse(content);
+
+    return NextResponse.json({ ...result });
+
   } catch (error: unknown) {
     console.error('[AI/SUMMARIZE_ERROR]', error);
     return NextResponse.json(

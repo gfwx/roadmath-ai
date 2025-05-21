@@ -1,16 +1,15 @@
 "use client"
 
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { SubmitButton } from "@/components/submit-button";
-import { createNewRoadmap, fetchRoadmapFromUser, fetchNodesFromRoadmap, createNodeData } from "@/app/actions";
-import type { Tables } from "@/utils/database.types";
-import { useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { createNewRoadmap, createNodeData, fetchNodesFromRoadmap, fetchRoadmapFromUser } from "@/lib/db";
 import { useLayout } from "@/app/context/LayoutContext";
-import { Separator } from "./ui/separator";
 import { useRoadmapStore, useSelectedNodeStore } from "@/app/stores/store";
-import { useRouter } from "next/navigation";
+import { SubmitButton } from "@/components/submit-button";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import type { Tables } from "@/utils/database.types";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Separator } from "./ui/separator";
 
 type Roadmap = Tables<"roadmaps">
 type Node = Tables<"node">
@@ -19,6 +18,7 @@ export function DashboardComponent({ roadmapData }: { roadmapData: Roadmap[] | n
   const searchParams = useSearchParams();
   const [currentInput, setCurrentInput] = useState("");
   const [currentNodes, setCurrentNodes] = useState<Node[] | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const data = useLayout();
   const router = useRouter();
@@ -32,19 +32,19 @@ export function DashboardComponent({ roadmapData }: { roadmapData: Roadmap[] | n
 
   async function handleSubmit() {
     if (!data.user) return;
-    // const response = await getRoadmapEmbeddings(currentInput);
-
     const res = await createNewRoadmap(currentInput, data.user.age ?? 18, data.user.m_comfort_level ?? 3, "");
-    console.log(res.success);
   }
 
   async function handleNodeSelect(node: Node) {
     if (!selectedRoadmap) return;
     setSelectedNode(node);
 
-    const data = await createNodeData(node, selectedRoadmap);
-    console.log(data);
+    console.log(node);
 
+    setLoading(true);
+    const data = await createNodeData(node, selectedRoadmap);
+
+    setLoading(false);
     router.push(`/protected/roadmap/${node.id}`)
   }
 
@@ -101,15 +101,14 @@ export function DashboardComponent({ roadmapData }: { roadmapData: Roadmap[] | n
             <Separator className="my-4" />
 
             {currentNodes &&
-
               <section className="flex flex-col gap-4">
                 {currentNodes.map((node) => (
                   <div key={node.id}>
                     <Card className='transition-all hover:bg-primary hover:text-card cursor-pointer' onClick={() => handleNodeSelect(node)}>
                       <CardHeader />
                       <CardContent>
-                        <h2 className='text-lg font-bold'>{node.data?.title ?? 'No title provided'}</h2>
-                        <p className='text-sm'>{node.data?.description ?? 'No description provided'}</p>
+                        <h2 className='text-lg font-bold'>{node.title ?? 'No title provided'}</h2>
+                        <p className='text-sm'>{node.description ?? 'No description provided'}</p>
                       </CardContent>
                       <CardFooter>
                         {node.id}

@@ -1,8 +1,6 @@
 "use client"
 
 import { useRoadmapContext } from "@/app/context/RoadmapContext";
-import { useRoadmapStore } from "@/app/stores/store";
-import { useSelectedNodeStore } from "@/app/stores/store";
 
 interface RoadmapPageProps {
   params: { slug: string };
@@ -12,7 +10,7 @@ export default function RoadmapPage({ params }: RoadmapPageProps) {
   const selectedNode = useRoadmapContext()?.nodeData;
   const selectedRoadmap = useRoadmapContext()?.roadmapData;
 
-  if (selectedNode == null || selectedNode.data == null) {
+  if (selectedNode == null) {
     return (
       <div>
         <h2>This is the roadmap page for: {selectedRoadmap ? selectedRoadmap.title : ""}</h2>
@@ -23,10 +21,10 @@ export default function RoadmapPage({ params }: RoadmapPageProps) {
   else return (
     <div>
       {/* @ts-ignore */}
-      <h1 className='text-xl'>{selectedNode.data.title}</h1>
+      <h1 className='text-xl'>{selectedNode.title}</h1>
 
       {/* @ts-ignore */}
-      <p>{selectedNode.data.description}</p>
+      <p>{selectedNode.description}</p>
     </div>
   );
 }

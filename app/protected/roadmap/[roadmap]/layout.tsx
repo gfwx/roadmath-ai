@@ -1,8 +1,6 @@
 "use client"
 
 import { ReactNode } from "react";
-import { fetchNodeData } from "@/app/actions";
-import { useLayout } from "@/app/context/LayoutContext";
 import { useRoadmapStore, useSelectedNodeStore } from "@/app/stores/store";
 import { RoadmapLayoutProvider } from "@/app/context/RoadmapContext";
 
@@ -16,7 +14,7 @@ export default function RoadmapLayout({ children, params }: RoadmapLayoutProps) 
   const roadmap = useRoadmapStore((state) => state.roadmap);
 
   return (
-    <RoadmapLayoutProvider nodeData={node} roadmapData={roadmap}> r
+    <RoadmapLayoutProvider nodeData={node} roadmapData={roadmap}>
       <div className="min-h-screen p-6 pt-16">
         <main>{children}</main>
       </div>
