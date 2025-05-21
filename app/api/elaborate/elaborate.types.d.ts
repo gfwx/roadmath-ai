@@ -1,6 +1,4 @@
 export type ResponseBody = {
-  node_title: string;
-  node_desc: string;
   node_data: {
     header: string;
     markdown_formatted_content: string;

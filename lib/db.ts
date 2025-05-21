@@ -5,12 +5,13 @@ import { v4 as uuidv4 } from 'uuid';
 import { revalidatePath } from "next/cache";
 import type { Tables } from "@/utils/database.types";
 import type { ResponseBody } from "@/app/api/elaborate/elaborate.types";
-import { getAiResponse } from "./api";
+import { getAiResponse, getNodeData } from "./api";
 
 type User = Tables<"users">
 type Roadmap = Tables<"roadmaps">
 type Node = Tables<"node">
 type NodeData = Tables<"node_data">
+
 
 export const fetchRoadmaps = async () => {
   const supabase = await createClient();
@@ -158,19 +159,62 @@ export const fetchNodeData = async (roadmapId: string, nodeId: string) => {
   }
 }
 
-export const createNodeData = async (node: Node, roadmap: Roadmap) => {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/elaborate`, {
-    method: 'post',
-    headers: {
-      'content-type': 'application/json'
-    },
-    body: JSON.stringify({
-      title: node.title,
-      description: node.description,
-      difficulty: roadmap.difficulty,
-    })
-  });
-
-  const data: ResponseBody = await response.json()
-  return data;
+export const createNodeDataIfNotExists = async (node: Node, roadmap: Roadmap) => {
+  try {
+    const supabase = await createClient();
+    
+    // First check if node_data exists for this node
+    const { data, error } = await supabase
+      .from("node_data")
+      .select("*")
+      .eq("id", node.id)
+      .single();
+    
+    // If there's data and it's initialized, return it
+    if (data && data.initialized) {
+      return data;
+    }
+    
+    // Get new data from the API
+    const newNodeData = await getNodeData(node, roadmap);
+    
+    // If no existing record, insert one
+    if (error && error.code === 'PGRST116') { // Record not found
+      const { data: insertData, error: insertError } = await supabase
+        .from("node_data")
+        .insert<Partial<NodeData>>({
+          id: node.id,
+          initialized: true,
+          data: newNodeData
+        })
+        .select()
+        .single();
+        
+      if (insertError) {
+        throw insertError;
+      }
+      
+      return insertData || { id: node.id, initialized: true, data: newNodeData };
+    } else {
+      // Update existing record
+      const { data: updateData, error: updateError } = await supabase
+        .from("node_data")
+        .update<Partial<NodeData>>({
+          initialized: true,
+          data: newNodeData
+        })
+        .eq("id", node.id)
+        .select()
+        .single();
+        
+      if (updateError) {
+        throw updateError;
+      }
+      
+      return updateData || { id: node.id, initialized: true, data: newNodeData };
+    }
+  } catch (error) {
+    console.error("Error in createNodeDataIfNotExists:", error);
+    throw error;
+  }
 }

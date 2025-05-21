@@ -4,6 +4,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 
 type Roadmap = Tables<"roadmaps">;
 type Node = Tables<"node">
+type NodeData = Tables<"node_data">
 
 type RoadmapStore = {
   roadmap: Roadmap | null;
@@ -13,7 +14,8 @@ type RoadmapStore = {
 
 type SelectedNodeStore = {
   node: Node | null;
-  setNode: (nodes: Node) => void;
+  nodeData: Partial<NodeData> | null;
+  setNode: (node: Node, nodeData: Partial<NodeData>) => void;
   resetNode: () => void;
 }
 
@@ -36,12 +38,15 @@ export const useSelectedNodeStore = create<SelectedNodeStore>()(
   persist(
     (set) => ({
       node: null,
-      setNode: (node: Node) => set({ node }),
-      resetNode: () => set({ node: null }),
+      nodeData: null,
+      setNode: (node: Node, nodeData: Partial<NodeData>) => set({ node, nodeData }),
+      resetNode: () => set({ node: null, nodeData: null }),
+
     }),
     {
       name: 'selected-node-storage',
-      partialize: (state) => ({ node: state.node })
+      storage: createJSONStorage(() => sessionStorage),
+      partialize: (state) => ({ node: state.node, nodeData: state.nodeData })
     }
   )
 );

@@ -36,8 +36,13 @@ const SYSTEM_PROMPT = `
   - Markdown formatting is clear and includes math notation (e.g., f(x) = x^2, **bold**, etc.).
   - Content is conceptually accurate, concise, and well-structured for student learning.
   - Content is in-depth and covers all aspects of the topic.
-  - Only output the JSON — no extra commentary or formatting outside of it.
-  - The data returned adheres to the EXACT FORMAT of the above and only that format. There should be no other text in the output.
+  - ONLY OUTPUT VALID JSON - NO TEXT BEFORE OR AFTER THE JSON.
+  - DO NOT include any commentary, explanations, or backticks outside the JSON.
+  - DO NOT include \`\`\`json or any markdown formatting outside the JSON object.
+  - The response should begin with { and end with } with nothing else outside.
+  - IMPORTANT: For math notation, use standard LaTeX syntax like $x^2$ or $$\frac{a}{b}$$.
+  - Make sure to preserve newlines in your markdown content by using proper line breaks.
+  - Keep your JSON valid by escaping special characters properly.
   `
 
 
@@ -64,8 +69,51 @@ export async function POST(req: Request): Promise<Response> {
         { status: 500 }
       );
     }
-    const result: ResponseBody = JSON.parse(res);
-    return NextResponse.json({ result });
+    
+    try {
+      // Clean the response to handle potential formatting issues
+      res = res.trim();
+      
+      // Remove any markdown code block indicators if present
+      res = res.replace(/^```json\s*/, '');
+      res = res.replace(/^```\s*/, '');
+      res = res.replace(/\s*```$/, '');
+      
+      // Try to parse the response as JSON
+      const result = JSON.parse(res);
+      
+      // Ensure newlines are preserved in markdown content
+      if (result.data && Array.isArray(result.data)) {
+        result.data.forEach(item => {
+          if (item.markdown_formatted_content) {
+            // No additional processing needed as JSON.parse preserves \n characters
+          }
+        });
+      }
+      
+      return NextResponse.json({ ...result });
+    } catch (parseError) {
+      console.error('[JSON_PARSE_ERROR]', parseError);
+      console.log('Raw response content:', res);
+      
+      // Try to extract valid JSON - simplify to just extract the JSON content
+      try {
+        // Find content between outermost curly braces
+        const jsonMatch = res.match(/{[\s\S]*}/);
+        if (jsonMatch) {
+          const jsonContent = jsonMatch[0];
+          const result = JSON.parse(jsonContent);
+          return NextResponse.json({ ...result });
+        }
+      } catch (innerError) {
+        console.error('[JSON_EXTRACTION_ERROR]', innerError);
+      }
+      
+      return NextResponse.json(
+        { error: 'Failed to parse AI response as JSON', raw_response: res.substring(0, 500) },
+        { status: 500 }
+      );
+    }
 
   } catch (error: unknown) {
     console.error('[AI/SUMMARIZE_ERROR]', error);

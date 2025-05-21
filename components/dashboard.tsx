@@ -1,6 +1,6 @@
 "use client"
 
-import { createNewRoadmap, createNodeData, fetchNodesFromRoadmap, fetchRoadmapFromUser } from "@/lib/db";
+import { createNewRoadmap, createNodeDataIfNotExists, fetchNodesFromRoadmap, fetchRoadmapFromUser } from "@/lib/db";
 import { useLayout } from "@/app/context/LayoutContext";
 import { useRoadmapStore, useSelectedNodeStore } from "@/app/stores/store";
 import { SubmitButton } from "@/components/submit-button";
@@ -13,6 +13,7 @@ import { Separator } from "./ui/separator";
 
 type Roadmap = Tables<"roadmaps">
 type Node = Tables<"node">
+type NodeData = Tables<"node_data">
 
 export function DashboardComponent({ roadmapData }: { roadmapData: Roadmap[] | null }) {
   const searchParams = useSearchParams();
@@ -37,15 +38,21 @@ export function DashboardComponent({ roadmapData }: { roadmapData: Roadmap[] | n
 
   async function handleNodeSelect(node: Node) {
     if (!selectedRoadmap) return;
-    setSelectedNode(node);
-
-    console.log(node);
 
     setLoading(true);
-    const data = await createNodeData(node, selectedRoadmap);
-
-    setLoading(false);
-    router.push(`/protected/roadmap/${node.id}`)
+    try {
+      const data = await createNodeDataIfNotExists(node, selectedRoadmap) as Partial<NodeData>;
+      
+      // Set the node data in the store
+      setSelectedNode(node, data);
+      
+      // Navigate after state is set
+      setLoading(false);
+      router.push(`/protected/roadmap/${node.id}`);
+    } catch (error: any) {
+      setLoading(false);
+      console.error(`[DASHBOARD/HANDLENODESELECT FAILED]: ${error.message}`);
+    }
   }
 
   useEffect(() => {

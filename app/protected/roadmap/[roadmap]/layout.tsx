@@ -11,10 +11,13 @@ interface RoadmapLayoutProps {
 
 export default function RoadmapLayout({ children, params }: RoadmapLayoutProps) {
   const node = useSelectedNodeStore((state) => state.node);
+  const node_data = useSelectedNodeStore((state) => state.nodeData)
   const roadmap = useRoadmapStore((state) => state.roadmap);
 
+  console.log(node_data);
+
   return (
-    <RoadmapLayoutProvider nodeData={node} roadmapData={roadmap}>
+    <RoadmapLayoutProvider node={node} roadmap={roadmap} node_data={node_data}>
       <div className="min-h-screen p-6 pt-16">
         <main>{children}</main>
       </div>
